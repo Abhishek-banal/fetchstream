@@ -1,0 +1,26 @@
+name: Build Release Zip
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  upload-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Package extension files
+        run: |
+          zip -r fetchstream-extension.zip bootstrap img js LICENSE downloader.html filters.html history.html manifest.json popup.html service-worker.js upload.html
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: fetchstream-extension.zip

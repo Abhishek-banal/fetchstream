@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FetchStream - Filter Configuration</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap/icons/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-title: #0f172a;
+            --text-sub: #64748b;
+            --border-clr: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-title);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 32px 16px;
+            margin: 0;
+        }
+
+        .manager-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .manager-header {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+        }
+
+        .filter-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+            margin-bottom: 20px;
+        }
+
+        .filter-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--bg-page);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .extension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .form-check-label {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .category-toggle-container {
+            background-color: #f8fafc;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-clr);
+            margin-bottom: 16px;
+        }
+        
+        .category-toggle {
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-title);
+            margin: 0;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="manager-container">
+        <!-- Header Bar -->
+        <div class="manager-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <i class="bi bi-funnel-fill fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">Resource Filters</h5>
+                    <span class="text-muted small">Customize exactly which file types and categories are scanned.</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button id="resetFiltersBtn" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Defaults
+                </button>
+                <button id="saveFiltersBtn" class="btn btn-sm btn-primary px-4 rounded-pill">
+                    <i class="bi bi-save me-1"></i> Save Changes
+                </button>
+            </div>
+        </div>
+
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4">
+            <i class="bi bi-info-circle-fill fs-4 text-info flex-shrink-0"></i>
+            <div class="small">
+                <strong>Performance Note:</strong> Unchecked file types are dropped instantly by the background worker. Disabling formats you don't use significantly reduces browser CPU usage and memory footprint.
+            </div>
+        </div>
+
+        <!-- Dynamic Filter Container -->
+        <div id="filtersContainer">
+            <!-- Rendered via filters.js -->
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="saveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle-fill me-2"></i> Filters saved successfully!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/options.js"></script>
+    <script src="js/dialog.js"></script>
+    <script src="js/filters.js"></script>
+</body>
+</html>

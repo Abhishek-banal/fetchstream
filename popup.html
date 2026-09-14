@@ -1,0 +1,1262 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FetchStream</title>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="bootstrap/icons/bootstrap-icons.min.css">
+  <style>
+    :root {
+      color-scheme: light !important;
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-hover: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent: #0284c7;
+      --success: #059669;
+    }
+
+    body.vault-locked-ui [selector="upload"],
+    body.vault-locked-ui [selector="serverUpload"] {
+      opacity: 0.55;
+      filter: grayscale(100%);
+    }
+    
+    body.vault-locked-ui [selector="upload"],
+    body.vault-locked-ui [selector="serverUpload"] {
+      opacity: 0.55;
+      filter: grayscale(100%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background-color: var(--bg-page) !important;
+      color: var(--text-main) !important;
+      color-scheme: light !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      user-select: none;
+      width: 480px;
+      min-height: 480px;
+      max-height: 600px;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.4);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.7);
+    }
+
+    /* Header */
+    .app-header {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    .brand-icon {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    .header-btn {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.88rem;
+    }
+    .header-btn:hover {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-main);
+      border-color: var(--accent);
+    }
+    .spin-animation {
+      display: inline-block;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Media List & Items */
+    .streams-container {
+      padding: 12px;
+    }
+    .stream-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .stream-card:hover {
+      border-color: var(--accent) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Editable Stream Name */
+    .stream-title-input {
+      font-size: 0.88rem !important;
+      font-weight: 600 !important;
+      color: var(--text-main) !important;
+      background-color: transparent !important;
+      border: 1px solid transparent !important;
+      border-radius: 6px !important;
+      padding: 1px 5px !important;
+      height: 24px !important;
+      line-height: 1.3 !important;
+      transition: all 0.15s ease !important;
+      cursor: text;
+    }
+    .stream-title-input:hover {
+      background-color: var(--bg-surface-hover) !important;
+      border-color: var(--border-color) !important;
+    }
+    .stream-title-input:focus {
+      background-color: #ffffff !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15) !important;
+      outline: none !important;
+    }
+    .btn-rename {
+      opacity: 0.35;
+      transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .stream-card:hover .btn-rename {
+      opacity: 0.8;
+    }
+    .btn-rename:hover {
+      color: var(--primary) !important;
+      opacity: 1;
+    }
+
+    /* Stream Badges */
+    .stream-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background-color: rgba(2, 132, 199, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(2, 132, 199, 0.25);
+      display: inline-block;
+    }
+    .stream-badge.hls {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    /* Quality Dropdown */
+    .quality-dropdown {
+      width: auto !important;
+      max-width: 140px;
+      height: 23px !important;
+      padding: 1px 20px 1px 7px !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      color: var(--primary) !important;
+      background-color: #f0f9ff !important;
+      border: 1px solid #bae6fd !important;
+      border-radius: 6px !important;
+      cursor: pointer;
+      background-position: right 5px center !important;
+      background-size: 10px 10px !important;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .quality-dropdown:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+    }
+
+    .res-badge {
+      background-color: #f0fdf4 !important;
+      color: #166534 !important;
+      border: 1px solid #bbf7d0 !important;
+      font-weight: 700;
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .res-hd {
+      background-color: #f0f9ff !important;
+      color: #0369a1 !important;
+      border-color: #bae6fd !important;
+    }
+
+    .btn-service-select {
+      background: #f8fafc;
+      color: #334155 !important;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+      font-size: 0.76rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .btn-service-select:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .btn-download-stream {
+      background: var(--primary);
+      color: #ffffff !important;
+      border: none;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-download-stream:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-upload-stream {
+      background: #f0fdf4;
+      color: #166534 !important;
+      border: 1px solid #bbf7d0;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .btn-upload-stream:hover {
+      background: #dcfce7;
+      border-color: #86efac;
+      transform: translateY(-1px);
+    }
+
+    .btn-server-upload-stream {
+      background: #f5f3ff;
+      color: #6d28d9 !important;
+      border: 1px solid #ddd6fe;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .btn-server-upload-stream:hover {
+      background: #ede9fe;
+      border-color: #c4b5fd;
+      transform: translateY(-1px);
+    }
+
+    .btn-preview {
+      color: var(--accent);
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: transform 0.15s, color 0.15s;
+    }
+    .btn-preview:hover {
+      transform: scale(1.1);
+      color: var(--primary-hover);
+    }
+
+    .btn-action-icon {
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-action-icon:hover {
+      color: #ef4444;
+      background-color: var(--bg-surface-hover);
+    }
+
+    /* URL Box */
+    .url-preview-box {
+      background-color: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+      font-size: 0.75rem;
+      padding: 8px 10px;
+      border-radius: 8px;
+      word-break: break-all;
+    }
+
+    /* Active Download Card */
+    .active-dl-card {
+      background-color: var(--bg-surface) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 10px;
+      padding: 10px 12px;
+      transition: box-shadow 0.15s ease;
+    }
+    .active-dl-card:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 50px 24px;
+    }
+    .empty-icon {
+      font-size: 3rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+      opacity: 0.85;
+    }
+    .empty-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .empty-description {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    /* Offcanvas Settings */
+    .offcanvas {
+      background-color: #ffffff !important;
+      color: var(--text-main) !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+    .offcanvas-header {
+      background-color: #f8fafc;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+    }
+    .form-control, .form-select {
+      background-color: #ffffff !important;
+      color: var(--text-main) !important;
+      border-color: #cbd5e1 !important;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+    }
+
+    .pointer {
+      cursor: pointer;
+    }
+
+    @keyframes pulse-upload {
+      0%, 100% { opacity: 1; transform: translateY(0); }
+      50% { opacity: 0.5; transform: translateY(-2px); }
+    }
+
+    /* Horizontal Category Tabs */
+    .category-tabs {
+      display: flex;
+      background-color: #f1f5f9;
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      padding: 3px;
+      gap: 3px;
+      margin-bottom: 8px;
+    }
+    .category-tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 5px 4px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .category-tab-btn:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+    .category-tab-btn.active {
+      background-color: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .category-tab-badge {
+      font-size: 0.65rem;
+      padding: 0.5px 5px;
+      border-radius: 8px;
+      background-color: rgba(100, 116, 139, 0.15);
+      color: var(--text-muted);
+      font-weight: 700;
+      min-width: 16px;
+      text-align: center;
+    }
+    .category-tab-btn.active .category-tab-badge {
+      background-color: rgba(2, 132, 199, 0.12);
+      color: var(--primary);
+    }
+
+    /* Sub-category Pills */
+    .subfilter-container {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 2px 1px 6px 1px;
+      margin-bottom: 8px;
+      scrollbar-width: thin;
+    }
+    .subfilter-container::-webkit-scrollbar {
+      height: 3px;
+    }
+    .subfilter-container::-webkit-scrollbar-thumb {
+      background-color: rgba(148, 163, 184, 0.3);
+      border-radius: 2px;
+    }
+    .subfilter-pill {
+      flex-shrink: 0;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-muted);
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+    .subfilter-pill:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
+      background-color: #f8fafc;
+    }
+    .subfilter-pill.active {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .pdf-banner {
+      background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%) !important;
+      border-color: #fecaca !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="main" class="d-flex flex-column h-100">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="d-flex flex-column">
+        <h1 class="brand-title mb-0">
+          <i class="bi bi-play-circle-fill brand-icon"></i>
+          FetchStream
+          <span id="mainVaultPadlock" class="ms-2 cursor-pointer text-secondary" style="font-size: 0.9rem;" title="Vault Status"><i class="bi bi-unlock-fill"></i></span>
+        </h1>
+        <div class="d-flex align-items-center" style="margin-left: 26px; line-height: 1.2;">
+          <span class="text-danger fw-semibold me-2" style="font-size: 0.65rem;" title="Quality guessing from URL is active">*beta feature</span>
+          <a href="https://fetchstream.in" target="_blank" selector="update-badge" class="badge bg-warning text-dark text-decoration-none d-none" style="font-size: 0.6rem; padding: 2px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);" title="Click to get the latest version!">Update Available</a>
+        </div>
+      </div>
+      <div class="d-flex gap-1.5 align-items-center">
+        <span selector="uploadIndicator" class="d-none" style="color: #059669; font-size: 1.1rem; animation: pulse-upload 1.2s infinite;" title="Upload in progress">
+          <i class="bi bi-cloud-arrow-up-fill"></i>
+        </span>
+        <button selector="currentTabOnlyBtn" class="header-btn" title="Current Tab Only (Filter)">
+          <i class="bi bi-funnel"></i>
+        </button>
+        <button selector="clearListBtn" class="header-btn" title="Clear List">
+          <i class="bi bi-trash3"></i>
+        </button>
+        <button selector="refreshPageBtn" class="header-btn" title="Refresh Page & Rescan Media">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <button selector="serverUploadNavBtn" class="header-btn" title="Server Uploads (Cloud Runner)">
+          <i class="bi bi-hdd-network"></i>
+        </button>
+        <button selector="manualUploadBtn" class="header-btn" title="Manual Upload">
+          <i class="bi bi-cloud-arrow-up"></i>
+        </button>
+        <button selector="historyBtn" class="header-btn" title="History">
+          <i class="bi bi-clock-history"></i>
+        </button>
+        <div class="dropdown">
+          <button class="header-btn" type="button" data-bs-toggle="dropdown" title="Help & Links" style="background: none; border: none; padding: 0;">
+            <i class="bi bi-info-circle"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="font-size: 0.85rem; min-width: 150px;">
+            <li><a class="dropdown-item py-2" href="https://fetchstream.in" target="_blank" selector="websiteBtn"><i class="bi bi-globe me-2 text-muted"></i>Website</a></li>
+            <li><a class="dropdown-item py-2" href="https://fetchstream.in/documentation" target="_blank" selector="apiDocsBtn"><i class="bi bi-code-slash me-2 text-muted"></i>API &amp; Docs</a></li>
+            <li><a class="dropdown-item py-2" href="https://fetchstream.in#faq" target="_blank" selector="faqBtn"><i class="bi bi-question-circle me-2 text-muted"></i>FAQ</a></li>
+          </ul>
+        </div>
+        <button selector="dashboardBtn" class="header-btn" title="Open Download/Upload Dashboard">
+          <i class="bi bi-window-stack text-primary"></i>
+        </button>
+        <button selector="home" class="header-btn" title="Open Chrome Downloads">
+          <i class="bi bi-folder2-open"></i>
+        </button>
+        <button selector="optionsBtn" class="header-btn" title="Settings">
+          <i class="bi bi-sliders"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Active Tasks Section (Live Progress) -->
+    <div selector="activeDownloadsSection" class="px-3 pt-2.5 pb-1 d-none">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="small fw-bold text-primary text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+          <i class="bi bi-cloud-arrow-down-fill me-1"></i> Active Tasks (<span selector="activeDownloadsCount">0</span>)
+        </span>
+        <button selector="openDownloadsTab" class="btn btn-sm btn-link p-0 text-decoration-none text-muted" style="font-size: 0.75rem;">
+          Download / Upload Page <i class="bi bi-box-arrow-up-right"></i>
+        </button>
+      </div>
+      <div selector="activeDownloadsList" class="d-flex flex-column gap-2 mb-2">
+        <!-- Injected download progress items -->
+      </div>
+    </div>
+
+    <!-- Active Uploads Section (Cross-Tab Progress) -->
+    <div selector="activeUploadsSection" class="px-3 pt-1 pb-1 d-none">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="small fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px; color: #059669;">
+          <i class="bi bi-cloud-arrow-up-fill me-1"></i> Active Uploads (<span selector="activeUploadsCount">0</span>)
+        </span>
+        <div class="d-flex gap-1 align-items-center">
+          <button selector="pauseAllUploadsBtn" class="btn btn-xs btn-outline-warning py-0 px-1 border-0" style="font-size: 0.8rem;" title="Pause All Uploads"><i class="bi bi-pause-circle"></i></button>
+          <button selector="cancelAllUploadsBtn" class="btn btn-xs btn-outline-danger py-0 px-1 border-0" style="font-size: 0.8rem;" title="Cancel All Uploads"><i class="bi bi-x-circle"></i></button>
+          <button selector="openUploadTab" class="btn btn-sm btn-link p-0 text-decoration-none text-muted ms-1" style="font-size: 0.75rem;">
+            Upload Page <i class="bi bi-box-arrow-up-right"></i>
+          </button>
+        </div>
+      </div>
+      <div selector="activeUploadsList" class="d-flex flex-column gap-2 mb-2">
+        <!-- Injected upload progress items -->
+      </div>
+    </div>
+
+    <!-- Active Server Uploads Section (Cloud Runner Progress) -->
+    <div selector="activeServerUploadsSection" class="px-3 pt-1 pb-1 d-none">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="small fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px; color: #7c3aed;">
+          <i class="bi bi-hdd-network-fill me-1"></i> Server Uploads (<span selector="activeServerUploadsCount">0</span>)
+        </span>
+        <div class="d-flex gap-1 align-items-center">
+          <button selector="clearServerUploadsBtn" class="btn btn-xs btn-outline-secondary py-0 px-1.5 border-0" style="font-size: 0.72rem;" title="Clear completed server uploads">
+            <i class="bi bi-trash3 me-0.5"></i> Clear
+          </button>
+          <button selector="openDownloadsTabForServer" class="btn btn-sm btn-link p-0 text-decoration-none text-muted ms-1" style="font-size: 0.75rem;">
+            Download / Upload Page <i class="bi bi-box-arrow-up-right"></i>
+          </button>
+        </div>
+      </div>
+      <div selector="activeServerUploadsList" class="d-flex flex-column gap-2 mb-2">
+        <!-- Injected server upload progress items -->
+      </div>
+    </div>
+
+    <!-- State: Loading Spinner -->
+    <div selector="loading" class="empty-state">
+      <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="empty-title">Scanning for Media Streams</div>
+      <div class="empty-description">Detecting HLS playlists, video tracks, and media files...</div>
+    </div>
+
+    <!-- State: Empty / No Streams -->
+    <div selector="empty" class="empty-state d-none">
+      <i class="bi bi-camera-video empty-icon"></i>
+      <div class="empty-title">No Media Streams Detected</div>
+      <div class="empty-description mb-2">
+        Play media on this page to allow FetchStream to detect and inspect the stream automatically.
+      </div>
+    </div>
+
+    <!-- State: Disabled Page -->
+    <div selector="disable" class="empty-state d-none">
+      <i class="bi bi-slash-circle text-warning empty-icon"></i>
+      <div class="empty-title">Media inspection disabled on this page</div>
+      <a selector="disableDetail" href="javascript:" class="btn btn-sm btn-outline-primary mt-3">Learn More</a>
+    </div>
+
+    <!-- Stream List Container -->
+    <div selector="container" class="streams-container flex-grow-1 d-none">
+      <!-- Horizontal Category Tabs -->
+      <div class="category-tabs" selector="categoryTabs">
+        <button class="category-tab-btn active" selector="tabVideos" data-category="videos">
+          <i class="bi bi-camera-video-fill"></i> Videos <span class="category-tab-badge" selector="badgeVideos">0</span>
+        </button>
+        <button class="category-tab-btn" selector="tabAudio" data-category="audio">
+          <i class="bi bi-music-note-beamed"></i> Audio <span class="category-tab-badge" selector="badgeAudio">0</span>
+        </button>
+        <button class="category-tab-btn" selector="tabFiles" data-category="files">
+          <i class="bi bi-folder-fill"></i> Files <span class="category-tab-badge" selector="badgeFiles">0</span>
+        </button>
+      </div>
+
+      <!-- Files Sub-Category Filter Pills (visible when Files tab is active) -->
+      <div class="subfilter-container d-none" selector="subfilterContainer">
+        <button class="subfilter-pill active" selector="subfilterPill" data-sub="all">All Files (<span selector="badgeSubAll">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="disks"><i class="bi bi-disc me-0.5"></i> Disk Images (<span selector="badgeSubDisks">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="images"><i class="bi bi-image me-0.5"></i> Images (<span selector="badgeSubImages">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="pdf"><i class="bi bi-file-earmark-pdf me-0.5"></i> PDFs (<span selector="badgeSubPdf">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="docs"><i class="bi bi-file-earmark-text me-0.5"></i> Docs (<span selector="badgeSubDocs">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="sheets"><i class="bi bi-file-earmark-spreadsheet me-0.5"></i> Sheets (<span selector="badgeSubSheets">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="slides"><i class="bi bi-file-earmark-slides me-0.5"></i> Slides (<span selector="badgeSubSlides">0</span>)</button>
+        <button class="subfilter-pill" selector="subfilterPill" data-sub="archives"><i class="bi bi-file-earmark-zip me-0.5"></i> Archives (<span selector="badgeSubArchives">0</span>)</button>
+      </div>
+
+      <!-- Category Empty Placeholder -->
+      <div selector="emptyCategory" class="text-center py-4 text-muted d-none">
+        <i class="bi bi-inbox fs-2 opacity-50 d-block mb-1"></i>
+        <span selector="emptyCategoryText" class="small">No items found in this category</span>
+      </div>
+
+      <div selector="list" class="d-flex flex-column">
+        <!-- Item Template -->
+        <div selector="item" class="stream-card">
+          <!-- Row 1: Preview Icon + Stream Title Input (flex-grow) + Rename + Block -->
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span selector="play" class="btn-preview flex-shrink-0" title="Preview Stream">
+              <i selector="item-icon" class="bi bi-play-circle"></i>
+            </span>
+
+            <div class="d-flex align-items-center gap-1 flex-grow-1 overflow-hidden">
+              <input selector="name-input" type="text" class="stream-title-input form-control form-control-sm text-truncate flex-grow-1" title="Click to rename before download" spellcheck="false">
+              <span selector="current-page-badge" class="badge bg-danger text-white d-none ms-1 px-1 py-0" style="font-size: 0.6rem; line-height: 1.5;" title="This file belongs to the current page">Current Page</span>
+              <button selector="rename-btn" class="btn btn-sm btn-link p-0 text-muted btn-rename flex-shrink-0" title="Rename file">
+                <i class="bi bi-pencil-fill" style="font-size: 0.65rem;"></i>
+              </button>
+            </div>
+
+            <button selector="blocked" class="btn-action-icon flex-shrink-0 ms-auto" title="Filter Domain">
+              <i class="bi bi-slash-circle"></i>
+            </button>
+          </div>
+
+          <!-- Row 1.5: Telegram Caption Input (visible only when Telegram is selected) -->
+          <div selector="captionContainer" class="telegram-caption-row d-none mt-1 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light text-info py-0 px-2" style="font-size: 0.72rem; border-color: #cbd5e1;">
+                <i class="bi bi-telegram me-1"></i> Caption
+              </span>
+              <input selector="captionInput" type="text" class="form-control form-control-sm py-0.5 px-2" placeholder="Description sent to Telegram channel/chat (optional)..." style="font-size: 0.75rem; border-color: #cbd5e1;" spellcheck="false">
+            </div>
+          </div>
+
+          <!-- Row 2: Badges & Quality on Left, Action Buttons on Right -->
+          <div class="d-flex justify-content-between align-items-center gap-2 pt-1.5 border-top" style="border-color: #f1f5f9 !important;">
+            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+              <span selector="size" class="stream-badge">HLS</span>
+              <!-- Quality dropdown selector (auto populated for master playlists) -->
+              <select selector="quality-select" class="form-select form-select-sm quality-dropdown d-none" title="Select Stream Quality"></select>
+              <!-- Resolution badge for single track streams -->
+              <span selector="res-badge" class="res-badge d-none"></span>
+              <button selector="url-toggle" class="btn btn-link p-0 text-muted small text-decoration-none" title="View Stream URL">
+                <i class="bi bi-link-45deg fs-6"></i>
+              </button>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex align-items-center gap-1.5 flex-wrap ms-auto">
+              <!-- Dedicated Destination Dropdown -->
+              <div class="dropdown">
+                <button type="button" selector="serviceSelectBtn" class="btn-service-select dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Choose Target Destination">
+                  <i class="bi bi-cloud-arrow-up"></i>
+                  <span selector="serviceSelectText">Dest: GoFile</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" selector="uploadDropdownMenu" style="font-size: 0.78rem; min-width: 215px;">
+                  <li><h6 class="dropdown-header py-1" style="font-size: 0.7rem;">Select Upload Destination</h6></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="gofile.io"><i class="bi bi-cloud-arrow-up me-1.5 text-success"></i> GoFile</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="buzzheavier.com"><i class="bi bi-lightning-charge me-1.5 text-warning"></i> Buzzheavier</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="fuckingfast.co"><i class="bi bi-speedometer2 me-1.5 text-danger"></i> FFast</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="storage.to"><i class="bi bi-hdd me-1.5 text-info"></i> Storage.to</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="catbox.moe"><i class="bi bi-box-seam me-1.5 text-secondary"></i> Catbox</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="pixeldrain.com"><i class="bi bi-hdd-network me-1.5 text-primary"></i> Pixeldrain</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="s3_compatible"><i class="bi bi-server me-1.5 text-dark"></i> S3 Storage</button></li>
+                  <li><button class="dropdown-item py-1" type="button" data-service="telegram"><i class="bi bi-telegram me-1.5 text-info"></i> Telegram</button></li>
+                  <li><hr class="dropdown-divider my-1"></li>
+                  <li><button class="dropdown-item py-1 text-primary fw-bold" type="button" selector="multiHostBtn"><i class="bi bi-check2-square me-1.5 text-primary"></i> Custom Multi-Host Selection...</button></li>
+                  <li><button class="dropdown-item py-1 text-primary" type="button" data-service="all"><i class="bi bi-layers-fill me-1.5"></i> All Working Services</button></li>
+                </ul>
+              </div>
+
+              <!-- Action Buttons -->
+              <button selector="download" class="btn-download-stream" title="Save to local device">
+                <i class="bi bi-download"></i>
+                <span>Download</span>
+              </button>
+              <button selector="upload" class="btn-upload-stream" title="Local Upload: Browser downloads segments and uploads to selected destination">
+                <i class="bi bi-cloud-arrow-up-fill"></i>
+                <span selector="uploadText">Local Upload</span>
+              </button>
+              <button selector="serverUpload" class="btn-server-upload-stream" title="Server Upload: Cloud runner downloads & uploads directly in cloud (0 Local MB used)">
+                <i class="bi bi-hdd-network-fill"></i>
+                <span selector="serverUploadText">Server Upload</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- URL Collapse -->
+          <div selector="url-collapse" class="collapse mt-2 pt-2 border-top">
+            <div selector="url" class="url-preview-box"></div>
+            <div class="d-flex justify-content-end gap-2 mt-2">
+              <button selector="curl" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 small" style="font-size: 0.75rem;">
+                <i class="bi bi-terminal me-1"></i> Copy cURL
+              </button>
+              <button selector="copy" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 small" style="font-size: 0.75rem;">
+                <i class="bi bi-clipboard me-1"></i> Copy Stream URL
+              </button>
+              <button selector="url-close" class="btn btn-close btn-sm p-1"></button>
+            </div>
+          </div>
+
+          <!-- In-Popup Player Collapse -->
+          <div selector="player-collapse" class="collapse mt-2 pt-2 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-1.5">
+              <span class="small fw-semibold text-primary">
+                <i class="bi bi-camera-reels me-1"></i> <span selector="resolution">Live Stream</span>
+              </span>
+              <button selector="player-close" class="btn btn-close btn-sm p-1"></button>
+            </div>
+            <div selector="player" class="rounded overflow-hidden bg-black d-flex justify-content-center"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Offcanvas Settings Panel -->
+    <div selector="options" class="offcanvas offcanvas-top h-100" tabindex="-1">
+      <div class="offcanvas-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-sliders brand-icon"></i>
+          <h6 class="mb-0 fw-bold">Settings</h6>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+
+      <div class="offcanvas-body p-3">
+        <!-- Session Memory -->
+        <div class="py-2 mb-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small text-dark">Session Memory</span>
+            <i class="bi bi-memory text-muted small"></i>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" selector="keepHistoryToggle" id="settingKeepHistory">
+            <label class="form-check-label small text-muted" for="settingKeepHistory">Keep History (retain files across navigations)</label>
+          </div>
+        </div>
+
+        <!-- Download Concurrency & Parallel Threads -->
+        <div class="py-2 mb-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small text-dark">Download Performance</span>
+            <i class="bi bi-lightning-charge text-muted small"></i>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-1" for="settingConcurrency">Parallel Download Threads</label>
+            <select selector="concurrency" id="settingConcurrency" class="form-select form-select-sm">
+              <option value="2">2 Threads (Low Bandwidth)</option>
+              <option value="4">4 Threads (Balanced)</option>
+              <option value="6" selected>6 Threads (Recommended)</option>
+              <option value="8">8 Threads (Fast)</option>
+              <option value="12">12 Threads (High-Speed)</option>
+              <option value="16">16 Threads (Maximum Speed)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label small text-muted mb-1" for="settingRetries">Segment Retry Attempts</label>
+            <select selector="retries" id="settingRetries" class="form-select form-select-sm">
+              <option value="1">1 Attempt</option>
+              <option value="2">2 Attempts</option>
+              <option value="3" selected>3 Attempts (Recommended)</option>
+              <option value="4">4 Attempts</option>
+              <option value="5">5 Attempts (High Resilience)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Upload Settings -->
+        <div class="py-2 mb-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small text-dark">Upload Destination</span>
+            <i class="bi bi-cloud-upload text-muted small"></i>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-1" for="settingUploadService">Default Destination for "Upload" Button</label>
+            <select selector="uploadService" id="settingUploadService" class="form-select form-select-sm mb-2">
+              <option value="local" selected>Save to Local Device (Standard)</option>
+              <option value="custom">⚡ Custom Multi-Host List...</option>
+              <optgroup label="Direct & Public File Hosts">
+                <option value="gofile.io">GoFile</option>
+                <option value="buzzheavier.com">Buzzheavier</option>
+                <option value="fuckingfast.co">FFast</option>
+                <option value="storage.to">Storage.to</option>
+                <option value="catbox.moe">Catbox.moe</option>
+              </optgroup>
+              <optgroup label="Personal Cloud Drives">
+                <option value="pixeldrain.com">Pixeldrain</option>
+                <option value="mega" disabled>MEGA.nz (Coming Soon)</option>
+                <option value="dropbox" disabled>Dropbox (Coming Soon)</option>
+                <option value="google_drive" disabled>Google Drive (Coming Soon)</option>
+                <option value="onedrive" disabled>OneDrive (Coming Soon)</option>
+              </optgroup>
+              <optgroup label="Object Storage &amp; Buckets">
+                <option value="s3_compatible">S3-Compatible Object Storage (AWS / R2 / HF / MinIO)</option>
+              </optgroup>
+              <optgroup label="Messaging">
+                <option value="telegram">Telegram Bot</option>
+              </optgroup>
+            </select>
+            
+            <div class="alert alert-light border py-1.5 px-2 small text-muted mb-2" style="font-size: 0.69rem; line-height: 1.35;">
+              <i class="bi bi-shield-exclamation text-warning me-1"></i> <strong>Third-Party & Lawful Use Disclaimer:</strong> FetchStream is an independent client tool and is not affiliated with, endorsed by, or partnered with GoFile, Pixeldrain, Catbox, or any other hosting provider. FetchStream does not store, host, inspect, or control your files; it only facilitates direct transmission from your browser to the chosen service. By uploading, you accept each provider's Terms of Service and Privacy Policy. Users are solely responsible for ensuring uploaded content is lawful and compliant with all applicable copyright laws.
+            </div>
+            
+            <!-- Service Specific Configuration Panels -->
+            <div class="mt-2 mb-2">
+              <div class="d-flex gap-2 w-100">
+                <button type="button" selector="openVaultBtn" class="btn btn-sm btn-outline-warning flex-grow-1 fw-bold shadow-sm">
+                  <i class="bi bi-lock-fill me-1"></i> Unlock Security Vault
+                </button>
+                <button type="button" selector="settingsLockVaultBtn" class="btn btn-sm btn-outline-danger fw-bold shadow-sm d-none" style="min-width: 110px;">
+                  <i class="bi bi-lock me-1"></i> Lock Vault
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Server-Side Upload Settings (Cloud Runner) -->
+        <div class="py-2 mb-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small" style="color: #6d28d9;"><i class="bi bi-hdd-network-fill me-1"></i> Server-Side Upload (Cloud Runner)</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary border" style="font-size: 0.65rem;">Zero Local MB</span>
+          </div>
+                    <div class="alert alert-light border py-1.5 px-2.5 small text-muted mb-2" style="font-size: 0.71rem; line-height: 1.35;">
+            <div class="mb-1"><i class="bi bi-info-circle-fill text-primary me-1"></i> <strong>Zero Local Footprint:</strong> Media streams are securely downloaded, assembled, and dispatched entirely on your designated remote server.</div>
+            <div class="mb-1"><i class="bi bi-shield-lock-fill text-warning me-1"></i> <strong>Authentication Handoff Notice:</strong> To process authenticated streams, necessary HTTP request headers (including session cookies and authorization tokens) are temporarily forwarded to your Remote Server URL. <strong>Ensure you configure a trusted or self-hosted server environment.</strong></div>
+            <div><i class="bi bi-shield-exclamation text-secondary me-1"></i> <strong>Compliance & Liability:</strong> FetchStream acts solely as a client-side routing tool. We do not host, store, or monitor any data. You are strictly responsible for adhering to the Terms of Service of your chosen cloud providers and complying with all applicable copyright laws.</div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5" style="font-size: 0.72rem;">Default Destination for "Server Upload"</label>
+            <select selector="serverUploadDefaultService" class="form-select form-select-sm">
+              <option value="gofile.io" selected>GoFile</option>
+              <option value="buzzheavier.com">Buzzheavier</option>
+              <option value="fuckingfast.co">FFast</option>
+              <option value="storage.to">Storage.to</option>
+              <option value="pixeldrain.com">Pixeldrain</option>
+              <option value="catbox.moe">Catbox.moe</option>
+              <option value="s3_compatible">S3-Compatible Storage</option>
+              <option value="telegram">Telegram Bot</option>
+              <option value="all">⚡ Upload to All Working Services</option>
+              <option value="custom">⚡ Custom Multi-Host List...</option>
+            </select>
+                        <div id="customServerUploadBox" class="mt-2 d-none">
+              <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-light">
+                <div>
+                  <div class="small fw-semibold text-dark">Selected Server Hosts:</div>
+                  <div id="customServerUploadSummaryText" class="text-muted small" style="font-size: 0.72rem;">GoFile, Buzzheavier</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary py-0.5 px-2" id="btnConfigureCustomServerUpload" style="font-size: 0.75rem;">
+                  <i class="bi bi-pencil-square me-1"></i> Edit List
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Remote Server configuration has been moved to the Security Vault -->
+          <div class="d-flex justify-content-between align-items-center mt-1.5 mb-1">
+            <a href="https://fetchstream.in/documentation" id="linkServerDocumentation" target="_blank" class="text-decoration-none small text-primary d-inline-flex align-items-center gap-1" style="font-size: 0.73rem;">
+              <i class="bi bi-book-half"></i> Server Setup Guide &amp; API Docs
+            </a>
+          </div>
+          <div class="form-check form-switch mt-2">
+            <input class="form-check-input" type="checkbox" selector="serverUploadFallbackProxy" id="checkFallbackProxy" checked>
+            <label class="form-check-label small text-muted" for="checkFallbackProxy" style="font-size: 0.74rem;">
+              Fallback through Edge Proxy if server runner IP is blocked (HTTP 403)
+            </label>
+          </div>
+        </div>
+
+        <!-- Resource Filters Link -->
+        <div class="py-2 mb-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small text-dark">Resource Filters</span>
+            <i class="bi bi-funnel text-muted small"></i>
+          </div>
+          <div class="alert alert-light border py-2 px-3 small text-muted mb-2 d-flex align-items-center justify-content-between">
+            <div>
+              <i class="bi bi-sliders me-1 text-primary"></i> Customize exactly which file types and categories are scanned.
+            </div>
+            <button id="openFiltersPageBtn" class="btn btn-sm btn-primary py-1 px-3 text-nowrap ms-2">
+              Configure
+            </button>
+          </div>
+        </div>
+
+        <!-- Size Filter (Spacious Grid) -->
+        <div class="py-2 mb-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small text-dark">File Size Filter</span>
+            <i class="bi bi-funnel text-muted small"></i>
+          </div>
+          <div class="row g-2 mb-1.5">
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1" for="sizeMinInput">Min Size</label>
+              <div class="input-group input-group-sm">
+                <input selector="sizeMin" id="sizeMinInput" class="form-control text-start ps-2" type="number" min="0" placeholder="0">
+                <span class="input-group-text bg-light text-muted">KB</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1" for="sizeMaxInput">Max Size</label>
+              <div class="input-group input-group-sm">
+                <input selector="sizeMax" id="sizeMaxInput" class="form-control text-start ps-2" type="number" min="0" placeholder="0">
+                <span class="input-group-text bg-light text-muted">KB</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-muted" style="font-size: 0.72rem; line-height: 1.3;">
+            Direct media files smaller than min or larger than max will be ignored. Set to 0 for no limit.
+          </div>
+        </div>
+
+        <!-- Filtered Domains -->
+        <div class="py-2">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-1.5 mb-2">
+            <span class="fw-semibold small text-dark">Blocked Domains</span>
+            <i class="bi bi-globe text-muted small"></i>
+          </div>
+          <div class="input-group input-group-sm mb-2">
+            <input selector="addDomainInput" type="text" class="form-control" placeholder="Enter domain or URL to block" spellcheck="false">
+            <button selector="addDomainBtn" class="btn btn-primary px-3" type="button"><i class="bi bi-plus-lg me-1"></i> Add</button>
+          </div>
+          <div selector="domain">
+            <div selector="noDomain" class="p-2 text-center rounded small text-muted" style="background-color: var(--bg-surface-hover);">No blocked domains</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Multi-Host Upload Modal -->
+  <div class="modal fade" id="multiHostModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 360px;">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header py-2 px-3 bg-light border-bottom">
+          <h6 class="modal-title fs-7 fw-bold text-dark d-flex align-items-center mb-0">
+            <i class="bi bi-check2-square me-1.5 text-primary"></i> Custom Multi-Host Selection
+          </h6>
+          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3">
+          <div class="small text-muted mb-2 text-truncate" id="multiHostFileName" style="font-size: 0.75rem;">Select destinations:</div>
+          <div class="fw-semibold small text-dark mb-1.5" style="font-size: 0.76rem;">Select Destination Services:</div>
+          <div class="d-flex flex-column gap-1.5" id="multiHostCheckboxList">
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="gofile.io" checked>
+              <span><strong>GoFile</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="buzzheavier.com">
+              <span><strong>Buzzheavier</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="fuckingfast.co">
+              <span><strong>FFast</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="storage.to">
+              <span><strong>Storage.to</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="catbox.moe">
+              <span><strong>Catbox / Litterbox</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="pixeldrain.com">
+              <span><strong>Pixeldrain</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="s3_compatible">
+              <span><strong>S3-Compatible Storage</strong></span>
+            </label>
+            <label class="d-flex align-items-center gap-2 p-1.5 rounded border bg-light small mb-0" style="cursor: pointer; font-size: 0.76rem;">
+              <input type="checkbox" class="form-check-input mt-0" value="telegram">
+              <span><strong>Telegram Bot</strong></span>
+            </label>
+          </div>
+          <div class="mt-2 text-muted" style="font-size: 0.68rem; line-height: 1.3;">
+            <i class="bi bi-shield-exclamation text-warning me-1"></i> <em><strong>Disclaimer:</strong> FetchStream is not affiliated with these third-party hosts and does not store or control uploaded files. You agree to adhere to each host's independent terms of service, acceptable use rules, and privacy policies. Users are strictly responsible for verifying that all uploaded files are lawful and authorized under applicable copyright laws.</em>
+          </div>
+        </div>
+        <div class="modal-footer py-2 px-3 bg-light border-top d-flex justify-content-between">
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2.5" data-bs-dismiss="modal" style="font-size: 0.75rem;">Cancel</button>
+          <button type="button" class="btn btn-sm btn-primary py-1 px-3" id="multiHostSaveBtn" style="font-size: 0.75rem;">
+            <i class="bi bi-check-lg me-1"></i> Save Selection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pre-Flight Size & Host Validation Modal -->
+  <div class="modal fade" id="preFlightModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 370px;">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header py-2 px-3 bg-warning bg-opacity-10 border-bottom border-warning border-opacity-25">
+          <h6 class="modal-title fs-7 fw-bold text-dark d-flex align-items-center mb-0">
+            <i class="bi bi-exclamation-triangle-fill text-warning me-1.5"></i> Upload Size Advisory
+          </h6>
+          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3">
+          <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-light mb-2.5">
+            <span class="small fw-semibold text-truncate me-2" id="preFlightFileName" style="font-size: 0.74rem;">media.mp4</span>
+            <span class="badge bg-secondary text-white" id="preFlightFileSize" style="font-size: 0.7rem;">~250 MB</span>
+          </div>
+
+          <!-- Problematic Hosts Warnings -->
+          <div id="preFlightWarningsContainer" class="d-flex flex-column gap-2 mb-2.5">
+            <!-- Dynamically populated warning alerts -->
+          </div>
+
+          <!-- Runner Storage Warning (>10GB) -->
+          <div id="preFlightRunnerNotice" class="alert alert-danger py-1.5 px-2 small d-none mb-2.5" style="font-size: 0.7rem; line-height: 1.35;">
+            <i class="bi bi-hdd-network-fill me-1"></i> <strong>Server Runner / VPS Disk Notice:</strong> Standard cloud runners provide ~14 GB of temporary disk. Files >10 GB require ~20 GB disk during FFmpeg remuxing and may cause disk exhaustion (ENOSPC).
+          </div>
+
+          <!-- Safe Hosts Info -->
+          <div id="preFlightSafeContainer" class="p-2 rounded border bg-success bg-opacity-10 text-success small mb-2 d-none" style="font-size: 0.72rem;">
+            <i class="bi bi-check-circle-fill me-1"></i> <span id="preFlightSafeText">Compatible with other selected hosts.</span>
+          </div>
+
+          <div class="text-muted" style="font-size: 0.69rem; line-height: 1.3;">
+            You can skip incompatible destinations, or proceed anyway if you have extended limits or wish to test.
+          </div>
+        </div>
+        <div class="modal-footer py-2 px-3 bg-light border-top d-flex justify-content-between gap-1">
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="preFlightCancelBtn" data-bs-dismiss="modal" style="font-size: 0.73rem;">
+            Cancel
+          </button>
+          <div class="d-flex gap-1">
+            <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 d-none" id="preFlightSkipBtn" style="font-size: 0.73rem;">
+              Skip &amp; Proceed
+            </button>
+            <button type="button" class="btn btn-sm btn-warning py-1 px-2.5 fw-semibold text-dark" id="preFlightProceedBtn" style="font-size: 0.73rem;">
+              Proceed Anyway
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/hls-player.js"></script>
+  <script src="js/options.js"></script>
+  <script src="js/history-manager.js"></script>
+  <script src="js/service-limits.js"></script>
+  <script src="js/uploader.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/dialog.js"></script>
+  <script src="js/popup.js"></script>
+  <script src="js/popup_vault.js"></script>
+    <!-- Security Vault Offcanvas -->
+    <div selector="vaultOffcanvas" class="offcanvas offcanvas-bottom h-100" tabindex="-1" style="background-color: #f8fafc; z-index: 1050;">
+      <div class="offcanvas-header bg-white border-bottom">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-lock-fill text-warning fs-5"></i>
+          <h6 class="mb-0 fw-bold">Security Vault</h6>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+
+      <div class="offcanvas-body p-3">
+        <!-- Locked State -->
+        <div selector="vaultLockedState" class="d-flex flex-column align-items-center justify-content-center h-100">
+          <i class="bi bi-lock-fill text-warning mb-3" style="font-size: 3rem;"></i>
+          <h5 class="fw-bold mb-2">Vault Locked</h5>
+          <div class="alert alert-warning py-2 px-3 small text-center mb-4" style="max-width: 400px; font-size: 0.8rem;">
+            <strong>Your API keys, Tokens, and Credentials are encrypted.</strong><br><br>
+            You must unlock the Vault for this session so the extension can use them. If the Vault remains locked, Server Uploads, Telegram Uploads, and other authenticated services will not work.
+          </div>
+          <div class="w-100" style="max-width: 300px;">
+            <input type="password" selector="vaultPasswordInput" class="form-control mb-2" placeholder="Master Passphrase">
+            <button selector="vaultUnlockBtn" class="btn btn-primary w-100 fw-bold mb-2"><i class="bi bi-key-fill me-1"></i> Unlock Vault</button>
+            <button selector="vaultWebAuthnBtn" class="btn btn-outline-primary w-100 fw-bold"><i class="bi bi-shield-check me-1"></i> Use Security Key / Passkey</button>
+            <div class="text-center mt-3 d-none" selector="vaultSetupNotice">
+              <span class="badge bg-info text-dark">First Time Setup: Enter a new Master Passphrase</span>
+            </div>
+            <div class="text-center mt-3" selector="vaultResetContainer">
+              <button selector="vaultResetBtn" class="btn btn-link text-danger btn-sm text-decoration-none" style="font-size: 0.75rem;"><i class="bi bi-trash-fill me-1"></i>Forget Password / Reset Vault</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unlocked State (Credentials Form) -->
+        <div selector="vaultUnlockedState" class="d-none pb-5">
+          <div class="alert alert-success py-2 px-3 small mb-3">
+            <i class="bi bi-unlock-fill me-1"></i> Vault is unlocked. Credentials are securely cached in memory for this session.
+          </div>
+          
+          <div class="d-flex justify-content-end mb-3">
+            <button selector="vaultRegisterPasskeyBtn" class="btn btn-outline-primary btn-sm fw-bold"><i class="bi bi-fingerprint me-1"></i> Register Passkey / Biometrics</button>
+          </div>
+          
+          <h6 class="fw-bold border-bottom pb-2 mb-3 mt-4 text-primary"><i class="bi bi-hdd-network me-1"></i> Remote Cloud Runner</h6>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Remote Server / Cloud Runner URL</label>
+            <input type="text" class="form-control form-control-sm vault-input" data-vault-key="serverRelayUrl" placeholder="https://your-server.com">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Server API Key / Token</label>
+            <input type="password" class="form-control form-control-sm vault-input" data-vault-key="serverApiKey" placeholder="Optional Bearer token">
+          </div>
+
+          <h6 class="fw-bold border-bottom pb-2 mb-3 mt-4 text-primary"><i class="bi bi-database me-1"></i> S3 Compatible Storage</h6>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Endpoint URL</label>
+            <input type="text" class="form-control form-control-sm vault-input" data-vault-key="s3Endpoint" placeholder="https://<id>.r2.cloudflarestorage.com">
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-7">
+              <label class="form-label small text-muted mb-0.5 fw-semibold">Bucket Name</label>
+              <input type="text" class="form-control form-control-sm vault-input" data-vault-key="s3Bucket" placeholder="my-videos">
+            </div>
+            <div class="col-5">
+              <label class="form-label small text-muted mb-0.5 fw-semibold">Region</label>
+              <input type="text" class="form-control form-control-sm vault-input" data-vault-key="s3Region" placeholder="auto">
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Access Key ID</label>
+            <input type="text" class="form-control form-control-sm vault-input" data-vault-key="s3AccessKey">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Secret Access Key</label>
+            <input type="password" class="form-control form-control-sm vault-input" data-vault-key="s3SecretKey">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Folder / Path Prefix (Optional)</label>
+            <input type="text" class="form-control form-control-sm vault-input" data-vault-key="s3Prefix" placeholder="videos/">
+          </div>
+
+          <h6 class="fw-bold border-bottom pb-2 mb-3 mt-4 text-info"><i class="bi bi-telegram me-1"></i> Telegram Bot</h6>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Bot API Token</label>
+            <input type="password" class="form-control form-control-sm vault-input" data-vault-key="telegramBotToken" placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Chat ID (User ID or @channel)</label>
+            <input type="text" class="form-control form-control-sm vault-input" data-vault-key="telegramChatId" placeholder="-100123456789">
+          </div>
+
+          <h6 class="fw-bold border-bottom pb-2 mb-3 mt-4 text-secondary"><i class="bi bi-cloud-arrow-up me-1"></i> Other Provider APIs</h6>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">Pixeldrain API Key</label>
+            <input type="password" class="form-control form-control-sm vault-input" data-vault-key="pixeldrainApiKey">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">GoFile Account Token</label>
+            <input type="password" class="form-control form-control-sm vault-input" data-vault-key="gofileToken">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small text-muted mb-0.5 fw-semibold">GoFile Folder ID</label>
+            <input type="text" class="form-control form-control-sm vault-input" data-vault-key="gofileFolderId">
+          </div>
+          
+          <div class="d-flex gap-2 mt-4">
+            <button selector="vaultSaveBtn" class="btn btn-success flex-grow-1 fw-bold"><i class="bi bi-save me-1"></i> Save & Encrypt</button>
+            <button selector="vaultLockBtn" class="btn btn-outline-danger"><i class="bi bi-lock me-1"></i> Lock</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>
+
+
+
+
+

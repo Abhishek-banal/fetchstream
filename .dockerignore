@@ -1,0 +1,86 @@
+# ==============================================================================
+# Docker Build Context Ignore List (.dockerignore)
+# Prevents transferring frontend UI files, docs, git metadata, and secrets
+# to the Docker daemon during image builds.
+# ==============================================================================
+
+# Git metadata & repository configurations
+.git
+.github
+.gitignore
+.gitattributes
+.dockerignore
+LICENSE
+*.md
+
+# Chrome Extension Frontend Assets & UI
+_locales/
+assets/
+bootstrap/
+img/
+js/
+public/
+*.html
+*.png
+*.jpg
+*.jpeg
+*.svg
+manifest.json
+icon-128.png
+
+# Python bytecode, caches, & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Telegram & Pyrogram session files (DO NOT EXPOSE)
+*.session
+*.session-journal
+
+# Secrets & environment configurations
+.env
+.env.*
+!.env.example
+
+# IDE, Editor & OS artifacts
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Extension package artifacts & keys
+*.crx
+*.zip
+*.tar.gz
+*.tgz
+*.pem
+
+# Logs & temporary files
+*.log
+scratch/
+tmp/
+temp/

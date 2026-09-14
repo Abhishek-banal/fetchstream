@@ -1,0 +1,319 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FetchStream - Manual Upload</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap/icons/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-title: #0f172a;
+            --text-sub: #64748b;
+            --border-clr: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-title);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 32px 16px;
+            margin: 0;
+        }
+
+        .manager-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .manager-header {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+        }
+
+        .upload-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-clr);
+            border-radius: 12px;
+            padding: 36px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--primary);
+            background-color: rgba(2, 132, 199, 0.05);
+        }
+
+        .queue-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+            margin-bottom: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .queue-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        }
+
+        .multi-link-box {
+            font-size: 0.8rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-clr);
+            border-radius: 6px;
+            padding: 6px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="manager-container">
+        <!-- Top Header Bar -->
+        <div class="manager-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <i class="bi bi-cloud-arrow-up-fill fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">FetchStream Manual Upload</h5>
+                    <span class="text-muted small">Upload single files, multi-files, or entire folders to cloud services</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="https://fetchstream.in" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="Visit our website">
+                    <i class="bi bi-globe me-1"></i> Website
+                </a>
+                <a href="downloader.html" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="Download & Upload Manager">
+                    <i class="bi bi-arrow-down-up me-1"></i> Download / Upload Page
+                </a>
+                <a href="history.html" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="History">
+                    <i class="bi bi-clock-history me-1"></i> History
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Upload Selector Card -->
+        <div class="upload-card">
+            <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-7">
+                    <label for="serviceSelect" class="form-label fw-bold mb-1">
+                        <i class="bi bi-hdd-network me-1 text-primary"></i> Default Upload Destination Service
+                    </label>
+                    <select class="form-select form-select-sm" id="serviceSelect">
+                        <option value="all">⚡ Upload to All Working Services (Multi-Host Links)</option>
+                          <optgroup label="Direct & Public File Hosts">
+                              <option value="gofile.io">GoFile</option>
+                              <option value="buzzheavier.com">Buzzheavier</option>
+                              <option value="fuckingfast.co">FFast</option>
+                              <option value="storage.to">Storage.to</option>
+                              <option value="catbox.moe">Catbox.moe</option>
+                          </optgroup>
+                          <optgroup label="Personal Cloud Drives">
+                              <option value="pixeldrain.com">Pixeldrain</option>
+                              <option value="mega" disabled>MEGA.nz (Coming Soon)</option>
+                              <option value="dropbox" disabled>Dropbox (Coming Soon)</option>
+                              <option value="google_drive" disabled>Google Drive (Coming Soon)</option>
+                              <option value="onedrive" disabled>OneDrive (Coming Soon)</option>
+                          </optgroup>
+                          <optgroup label="Object Storage &amp; Buckets">
+                              <option value="s3_compatible">S3-Compatible Object Storage (AWS S3 / R2 / Backblaze / MinIO)</option>
+                          </optgroup>
+                        <optgroup label="Messaging">
+                            <option value="telegram">Telegram Bot</option>
+                        </optgroup>
+                    </select>
+                    <small id="serviceHelp" class="text-muted d-block" style="font-size: 0.74rem;">Default upload destination for queued items. Each item below can also be individually routed.</small>
+                    <div class="alert alert-light border py-1.5 px-2.5 small text-muted mt-2 mb-0" style="font-size: 0.72rem; line-height: 1.35;">
+                        <i class="bi bi-shield-exclamation text-warning me-1"></i> <strong>Third-Party &amp; Lawful Use Notice:</strong> FetchStream is an independent utility and is not affiliated with, endorsed by, or partnered with GoFile, Pixeldrain, Catbox, or any other provider. FetchStream does not store, host, inspect, or moderate your files. Users are solely responsible for ensuring uploaded content is lawful and compliant with copyright terms.
+                    </div>
+                </div>
+                <div class="col-md-5 d-flex justify-content-md-end gap-2 align-items-end pt-3 pt-md-0">
+                    <button id="selectFilesBtn" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
+                        <i class="bi bi-files me-1"></i> Choose Files
+                    </button>
+                    <button id="selectFolderBtn" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="Upload folder as ZIP">
+                        <i class="bi bi-folder-plus me-1"></i> Choose Folder
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notification Container (Folder zip conversion etc.) -->
+            <div id="zipNotice" class="alert alert-info py-2 px-3 small d-none mb-3" style="font-size: 0.8rem;">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="spinner-border spinner-border-sm text-primary flex-shrink-0" role="status"></div>
+                    <span id="zipNoticeText">Folder detected. Converting folder to ZIP before uploading...</span>
+                </div>
+            </div>
+
+            <!-- Drag & Drop Area -->
+            <div class="drop-zone" id="dropZone">
+                <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 2.8rem;"></i>
+                <h6 class="fw-bold mt-2 mb-1">Drag &amp; Drop Files or Folders Here</h6>
+                <p class="text-muted small mb-0">or use the buttons above to select multiple files or a whole folder</p>
+                <input type="file" id="fileInput" multiple style="display:none;">
+                <input type="file" id="folderInput" webkitdirectory directory multiple style="display:none;">
+            </div>
+
+            <!-- Overall Action Buttons -->
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                <div class="d-flex gap-2">
+                    <button id="startUploadBtn" class="btn btn-sm btn-primary px-4 rounded-pill" disabled>
+                        <i class="bi bi-play-fill me-1"></i> Start Upload
+                    </button>
+                    <button id="pauseAllBtn" class="btn btn-sm btn-outline-warning px-3 rounded-pill" disabled>
+                        <i class="bi bi-pause-fill me-1"></i> Pause All
+                    </button>
+                    <button id="cancelAllBtn" class="btn btn-sm btn-outline-danger px-3 rounded-pill" disabled>
+                        <i class="bi bi-x-circle me-1"></i> Cancel All
+                    </button>
+                </div>
+                <button id="clearQueueBtn" class="btn btn-sm btn-link text-muted text-decoration-none" disabled>
+                    <i class="bi bi-trash3 me-1"></i> Clear Queue
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload Summary Bar -->
+        <div class="summary card p-3 mb-3 border-0 shadow-sm d-none" id="uploadSummary">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong id="summaryText" class="small text-dark">0 of 0 files processed</strong>
+                <span id="summaryPercent" class="small fw-bold text-primary">0%</span>
+            </div>
+            <div class="progress" style="height: 8px; border-radius: 4px;">
+                <div id="summaryProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Upload Queue Header -->
+        <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+            <h6 class="fw-bold mb-0 text-dark">
+                Upload Queue (<span id="queueCount">0</span>)
+            </h6>
+        </div>
+
+        <!-- Queue Items List -->
+        <div id="queueList" class="d-flex flex-column"></div>
+
+        <!-- Empty Queue State -->
+        <div id="emptyQueue" class="text-center py-4 bg-white rounded-3 border">
+            <i class="bi bi-cloud-upload text-muted" style="font-size: 2.5rem;"></i>
+            <h6 class="fw-bold mt-2 text-dark">No Files in Queue</h6>
+            <p class="text-muted small mb-0">Select or drop files to upload them.</p>
+        </div>
+    </div>
+
+    <!-- Large Folder Warning Modal (>100MB) -->
+    <div class="modal fade" id="largeFolderModal" tabindex="-1" aria-labelledby="largeFolderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning bg-opacity-10 border-bottom border-warning border-opacity-25 py-2.5">
+                    <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2 mb-0" id="largeFolderModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i> Large Folder Detected (>500MB)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <p class="mb-2">The selected folder <strong id="largeFolderName" class="text-dark">folder</strong> is <strong id="largeFolderSize" class="text-danger">120 MB</strong> in size.</p>
+                    <div class="alert alert-info py-2 px-3 small mb-2 border-info">
+                        <i class="bi bi-info-circle-fill me-1"></i> <strong>Advisory:</strong> FetchStream now uses advanced OPFS (Origin Private File System) streaming for ZIP packaging. This prevents browser crashes and uses minimal RAM.
+                    </div>
+                    <p class="small text-muted mb-0">
+                        However, zipping very large folders directly in the browser may still take a few moments. If preferred, you can still compress this folder into a <strong>.zip file on your computer first</strong> and upload that directly.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light py-2 px-3 justify-content-between">
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="cancelLargeFolderBtn" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Cancel &amp; Zip First (Recommended)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-warning px-3 fw-semibold text-dark" id="proceedLargeFolderBtn">
+                        Proceed Anyway <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pre-Flight Size & Host Validation Modal -->
+    <div class="modal fade" id="preFlightModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 400px;">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header py-2.5 px-3 bg-warning bg-opacity-10 border-bottom border-warning border-opacity-25">
+                    <h6 class="modal-title fs-7 fw-bold text-dark d-flex align-items-center mb-0">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1.5"></i> Upload Size Advisory
+                    </h6>
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-light mb-2.5">
+                        <span class="small fw-semibold text-truncate me-2" id="preFlightFileName" style="font-size: 0.76rem;">media.mp4</span>
+                        <span class="badge bg-secondary text-white" id="preFlightFileSize" style="font-size: 0.72rem;">~250 MB</span>
+                    </div>
+
+                    <!-- Problematic Hosts Warnings -->
+                    <div id="preFlightWarningsContainer" class="d-flex flex-column gap-2 mb-2.5">
+                        <!-- Dynamically populated warning alerts -->
+                    </div>
+
+                    <!-- Runner Storage Warning (>10GB) -->
+                    <div id="preFlightRunnerNotice" class="alert alert-danger py-1.5 px-2 small d-none mb-2.5" style="font-size: 0.72rem; line-height: 1.35;">
+                        <i class="bi bi-hdd-network-fill me-1"></i> <strong>GitHub Runner / VPS Notice:</strong> Standard GitHub Actions runners provide ~14 GB of temporary disk. Files >10 GB require ~20 GB disk during FFmpeg remuxing and may cause disk exhaustion (ENOSPC).
+                    </div>
+
+                    <!-- Safe Hosts Info -->
+                    <div id="preFlightSafeContainer" class="p-2 rounded border bg-success bg-opacity-10 text-success small mb-2 d-none" style="font-size: 0.74rem;">
+                        <i class="bi bi-check-circle-fill me-1"></i> <span id="preFlightSafeText">Compatible with other selected hosts.</span>
+                    </div>
+
+                    <div class="text-muted" style="font-size: 0.72rem; line-height: 1.3;">
+                        You can skip incompatible destinations, or proceed anyway if you have extended limits or wish to test.
+                    </div>
+                </div>
+                <div class="modal-footer py-2 px-3 bg-light border-top d-flex justify-content-between gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2.5" id="preFlightCancelBtn" data-bs-dismiss="modal" style="font-size: 0.75rem;">
+                        Cancel
+                    </button>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2.5 d-none" id="preFlightSkipBtn" style="font-size: 0.75rem;">
+                            Skip &amp; Proceed
+                        </button>
+                        <button type="button" class="btn btn-sm btn-warning py-1 px-3 fw-semibold text-dark" id="preFlightProceedBtn" style="font-size: 0.75rem;">
+                            Proceed Anyway
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/options.js"></script>
+    <script src="js/zip-builder.js"></script>
+    <script src="js/history-manager.js"></script>
+    <script src="js/service-limits.js"></script>
+    <script src="js/uploader.js"></script>
+    <script src="js/dialog.js"></script>
+    <script src="js/upload.js"></script>
+</body>
+</html>
+

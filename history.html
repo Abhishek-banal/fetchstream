@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FetchStream - History</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap/icons/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-title: #0f172a;
+            --text-sub: #64748b;
+            --border-clr: #e2e8f0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-title);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 32px 16px;
+            margin: 0;
+        }
+
+        .manager-container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .manager-header {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+        }
+
+        .history-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+            margin-bottom: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .history-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        }
+
+        .badge-download {
+            background-color: #e0f2fe;
+            color: #0284c7;
+            font-weight: 600;
+        }
+        .badge-upload {
+            background-color: #d1fae5;
+            color: #059669;
+            font-weight: 600;
+        }
+        .multi-link-item {
+            font-size: 0.8rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-clr);
+            border-radius: 6px;
+            padding: 6px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="manager-container">
+        <!-- Top Header Bar -->
+        <div class="manager-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <i class="bi bi-clock-history fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">FetchStream History</h5>
+                    <span class="text-muted small">Permanent record of all downloads and uploads</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="https://fetchstream.in" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="Visit our website">
+                    <i class="bi bi-globe me-1"></i> Website
+                </a>
+                <a href="downloader.html" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="Download & Upload Manager">
+                    <i class="bi bi-cloud-arrow-down me-1"></i> Download / Upload Page
+                </a>
+                <a href="upload.html" target="_blank" class="btn btn-sm btn-outline-info px-3 rounded-pill" title="Manual Upload">
+                    <i class="bi bi-cloud-arrow-up me-1"></i> Manual Upload
+                </a>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="d-flex gap-2 align-items-center">
+                <div class="btn-group btn-group-sm" role="group">
+                    <button id="filterAll" class="btn btn-outline-primary active">All (<span id="countAll">0</span>)</button>
+                    <button id="filterDownloads" class="btn btn-outline-primary">Downloads (<span id="countDownloads">0</span>)</button>
+                    <button id="filterUploads" class="btn btn-outline-primary">Uploads (<span id="countUploads">0</span>)</button>
+                </div>
+                <div class="input-group input-group-sm" style="max-width: 240px;">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search history...">
+                </div>
+            </div>
+            <button id="clearAllBtn" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash3 me-1"></i> Clear All History
+            </button>
+        </div>
+
+        <!-- History List Container -->
+        <div id="historyList" class="d-flex flex-column"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5 bg-white rounded-3 border d-none">
+            <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
+            <h5 class="fw-bold mt-3 text-dark">No History Yet</h5>
+            <p class="text-muted small mb-0">Files you download or upload will be permanently recorded here.</p>
+        </div>
+    </div>
+
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/history-manager.js"></script>
+    <script src="js/dialog.js"></script>
+    <script src="js/history.js"></script>
+</body>
+</html>

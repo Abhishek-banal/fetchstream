@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FetchStream Download & Upload Manager</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bootstrap/icons/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light !important;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-title: #0f172a;
+            --text-sub: #64748b;
+            --border-clr: #e2e8f0;
+            --card-hover: #f1f5f9;
+        }
+
+        body {
+            background-color: var(--bg-page) !important;
+            color: var(--text-title) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+            padding: 32px 16px;
+            margin: 0;
+        }
+
+        .manager-container {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .manager-header {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+        }
+
+        .task-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-clr);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            margin-bottom: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .task-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+            transition: width 0.25s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="manager-container">
+        <!-- Top Header Bar -->
+        <div class="manager-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <i class="bi bi-arrow-down-up fs-4"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">FetchStream Download & Upload Manager</h5>
+                    <span id="headerStatus" class="text-muted small">Managing stream downloads and cloud uploads</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="https://fetchstream.in" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="Visit our website">
+                    <i class="bi bi-globe me-1"></i> Website
+                </a>
+                <a href="upload.html" target="_blank" class="btn btn-sm btn-outline-info px-3 rounded-pill" title="Manual Upload">
+                    <i class="bi bi-cloud-arrow-up me-1"></i> Manual Upload
+                </a>
+                <a href="history.html" target="_blank" class="btn btn-sm btn-outline-secondary px-3 rounded-pill" title="History">
+                    <i class="bi bi-clock-history me-1"></i> History
+                </a>
+                <button id="openChromeDownloadsBtn" class="btn btn-sm btn-outline-primary px-3 rounded-pill">
+                    <i class="bi bi-folder2-open me-1"></i> Chrome Downloads
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Tasks Container (All downloads in one tab) -->
+        <div id="tasksList" class="d-flex flex-column"></div>
+
+        <!-- Empty State -->
+        <div id="emptyTasks" class="text-center py-5 bg-white rounded-3 border d-none">
+            <i class="bi bi-check2-circle text-success" style="font-size: 3rem;"></i>
+            <h5 class="fw-bold mt-3 text-dark">No Active Downloads</h5>
+            <p class="text-muted small mb-0">Initiate downloads from the FetchStream extension popup.</p>
+        </div>
+    </div>
+
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/history-manager.js"></script>
+    <script src="js/service-limits.js"></script>
+    <script src="js/uploader.js"></script>
+    <script src="js/dialog.js"></script>
+    <script src="js/downloader.js"></script>
+</body>
+</html>

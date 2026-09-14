@@ -1,0 +1,22 @@
+services:
+  fetchstream-runner:
+    build:
+      context: ../../
+      dockerfile: backend/docker/Dockerfile
+    container_name: fetchstream-remote-runner
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - PORT=8000
+      # Optional: set a custom API key to password-protect your runner
+      # In the extension settings, enter this same key in "Server API Key / Token"
+      - API_KEY=${API_KEY:-}
+      # Optional: Telegram API credentials for direct 2GB MTProto uploads
+      - TG_API_ID=${TG_API_ID:-}
+      - TG_API_HASH=${TG_API_HASH:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

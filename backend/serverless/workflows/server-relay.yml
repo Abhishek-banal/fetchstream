@@ -1,0 +1,129 @@
+﻿name: FetchStream Cloud Runner
+
+on:
+  repository_dispatch:
+    types: [server_relay]
+  workflow_dispatch:
+    inputs:
+      media_url:
+        description: 'Target Media / M3U8 Stream URL'
+        required: true
+      file_name:
+        description: 'Output File Name'
+        required: false
+        default: 'video.mp4'
+      type:
+        description: 'Media Type (hls or direct)'
+        required: false
+        default: 'hls'
+      service:
+        description: 'Destination Upload Service (gofile.io, buzzheavier.com, pixeldrain.com, catbox.moe, FFast, storage.to, s3_compatible, hf_buckets, telegram, all)'
+        required: false
+        default: 'gofile.io'
+      description:
+        description: 'Telegram Caption / Video Description'
+        required: false
+        default: ''
+      job_id:
+        description: 'Job Identifier'
+        required: false
+        default: 'manual_run'
+      callback_url:
+        description: 'Cloudflare Pages Callback URL'
+        required: false
+        default: ''
+      proxy_url:
+        description: 'Cloudflare Pages Proxy Fallback URL'
+        required: false
+        default: ''
+      use_fallback_proxy:
+        description: 'Use Cloudflare Fallback Proxy on 403'
+        required: false
+        default: 'true'
+      threads:
+        description: 'Parallel Download Threads (2 to 24)'
+        required: false
+        default: '8'
+
+jobs:
+  server_relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify FFmpeg
+        run: |
+          if ! command -v ffmpeg &> /dev/null; then
+            echo "Installing native FFmpeg..."
+            sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version | head -n 2
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          pip install requests cryptography pyrogram tgcrypto
+
+      - name: Launch Local Telegram Bot API Server for 2GB Uploads
+        if: ${{ contains(github.event.client_payload.service, 'telegram') || contains(inputs.service, 'telegram') || github.event.client_payload.service == 'all' || inputs.service == 'all' }}
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID || '6' }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH || 'eb06d4abfb49dc3eeb1aeb98ae0f581e' }}
+        run: |
+          echo "Starting official Telegram Bot API local server container (2GB support)..."
+          docker run -d -p 8081:8081 \
+            -e TELEGRAM_API_ID="${TG_API_ID}" \
+            -e TELEGRAM_API_HASH="${TG_API_HASH}" \
+            -e TELEGRAM_LOCAL=true \
+            --name tg_bot_server \
+            aiogram/telegram-bot-api:latest --local
+          sleep 3
+
+      - name: Execute Server-Side Download and Upload
+        env:
+          JOB_ID: ${{ github.event.client_payload.jobId || inputs.job_id }}
+          MEDIA_URL: ${{ github.event.client_payload.mediaUrl || inputs.media_url }}
+          HEADERS_JSON: ${{ toJson(github.event.client_payload.headers) }}
+          FILE_NAME: ${{ github.event.client_payload.fileName || inputs.file_name }}
+          TYPE: ${{ github.event.client_payload.type || inputs.type }}
+          FORMAT: ${{ github.event.client_payload.format || 'mp4' }}
+          SERVICE: ${{ github.event.client_payload.service || inputs.service }}
+          THREADS: ${{ github.event.client_payload.threads || inputs.threads || '8' }}
+          CREDENTIALS_JSON: ${{ toJson(github.event.client_payload.credentials) }}
+          INPUT_DESC: ${{ github.event.client_payload.description || inputs.description || '' }}
+          CALLBACK_URL: ${{ github.event.client_payload.callbackUrl || inputs.callback_url }}
+          PROXY_URL: ${{ github.event.client_payload.proxyConfig.url || github.event.client_payload.proxyUrl || inputs.proxy_url }}
+          USE_FALLBACK_PROXY: ${{ github.event.client_payload.proxyConfig.useFallback || github.event.client_payload.useFallbackProxy || inputs.use_fallback_proxy }}
+          TG_API_ID: ${{ secrets.TG_API_ID || '6' }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH || 'eb06d4abfb49dc3eeb1aeb98ae0f581e' }}
+        run: |
+          CREDS="$CREDENTIALS_JSON"
+          if [ -n "$INPUT_DESC" ] && [ "$CREDS" != "null" ] && [ -n "$CREDS" ]; then
+            CREDS=$(python3 -c 'import json, os; d = json.loads(os.environ.get("CREDS") or "{}"); d["description"] = os.environ.get("INPUT_DESC"); print(json.dumps(d))')
+          elif [ -n "$INPUT_DESC" ]; then
+            CREDS=$(python3 -c 'import json, os; print(json.dumps({"description": os.environ.get("INPUT_DESC")}))')
+          elif [ "$CREDS" = "null" ] || [ -z "$CREDS" ]; then
+            CREDS="{}"
+          fi
+
+          python scripts/server_uploader.py \
+            --job-id "$JOB_ID" \
+            --media-url "$MEDIA_URL" \
+            --headers-json "$HEADERS_JSON" \
+            --file-name "$FILE_NAME" \
+            --type "$TYPE" \
+            --service "$SERVICE" \
+            --threads "$THREADS" \
+            --credentials-json "$CREDS" \
+            --callback-url "$CALLBACK_URL" \
+            --proxy-url "$PROXY_URL" \
+            --use-fallback "$USE_FALLBACK_PROXY"
+

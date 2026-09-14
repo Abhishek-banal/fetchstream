@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "FetchStream - Universal Web Media & Stream Downloader",
+  "short_name": "FetchStream",
+  "version": "2.0.0",
+  "description": "The all-in-one web media inspector, stream downloader, and cloud uploader for video, audio, disk images, and files.",
+  "icons": {
+    "16": "img/icon-16.png",
+    "48": "img/icon-48.png",
+    "128": "img/icon-128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "img/icon-16.png",
+      "48": "img/icon-48.png",
+      "128": "img/icon-128.png"
+    },
+    "default_title": "FetchStream",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "cookies",
+    "storage",
+    "declarativeNetRequest",
+    "downloads",
+    "scripting",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}
