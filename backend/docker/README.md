@@ -1,8 +1,8 @@
-# 🐳 Self-Hosted FetchStream Remote Runner (Docker / VPS)
+# 🐳 Example Reference Blueprint A: Self-Hosted Docker Runner
 
-Run your own high-performance, private FetchStream Remote Runner on any Linux VPS, Raspberry Pi, home server, NAS, or local machine.
+This directory provides an example reference implementation of a FetchStream Remote Runner using FastAPI and Docker. You can use this blueprint to quickly deploy a high-performance, private runner on any Linux VPS, Raspberry Pi, home server, NAS, or local machine.
 
-## 🚀 Quick Start (Docker)
+## 🚀 Example Deployment (Docker)
 
 ### 1. Configure Environment (Optional)
 ```bash
